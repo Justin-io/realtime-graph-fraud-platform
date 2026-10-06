@@ -1,0 +1,278 @@
+{
+  "project": "Production-Grade Real-Time Graph Fraud Detection Platform",
+  "version": "1.0.0",
+  "last_updated": "2026-10-06T07:45:00Z",
+  "current_iteration": 1,
+  "epics": [
+    {
+      "id": "EPIC-1",
+      "name": "Multi-Entity Simulator & Adversarial Attack Generator",
+      "description": "High-throughput simulation of Users, Cards, Devices, IPs, Merchants, Addresses, with realistic fraud attacks (carding bursts, device sharing, impossible travel, IP proxy farms, merchant collusion, ATO).",
+      "tasks": [
+        {
+          "id": "TASK-101",
+          "title": "Multi-Entity & Transaction Simulator",
+          "status": "NOT_STARTED",
+          "acceptance_criteria": [
+            "Generates 6 distinct relational entities: User, Card, Device, IP, Merchant, Address",
+            "Simulates realistic background legitimate transactional behavior with diurnal patterns",
+            "Outputs streaming transaction records with full entity bindings and timestamps"
+          ],
+          "dependencies": []
+        },
+        {
+          "id": "TASK-102",
+          "title": "Adversarial Fraud Scenario Injector",
+          "status": "NOT_STARTED",
+          "acceptance_criteria": [
+            "Injects 6 distinct fraud patterns: Velocity bursts, Device-sharing rings, Impossible travel, IP proxy clusters, Merchant collusion, Account Takeover",
+            "Simulates evolving fraud behaviors and delayed label arrival (14-90 days)",
+            "Generates ground-truth fraud labels and attack metadata"
+          ],
+          "dependencies": ["TASK-101"]
+        }
+      ]
+    },
+    {
+      "id": "EPIC-2",
+      "name": "Dynamic Heterogeneous Entity Graph & Ring Detector",
+      "description": "Constructs and maintains a dynamic multi-relational entity graph with temporal edge decay, cycle detection, and fraud-ring clustering.",
+      "tasks": [
+        {
+          "id": "TASK-201",
+          "title": "Dynamic Heterogeneous Entity Graph",
+          "status": "NOT_STARTED",
+          "acceptance_criteria": [
+            "Maintains typed nodes (User, Card, Device, IP, Merchant, Address) and directed temporal edges",
+            "Sub-second incremental graph updates on incoming streaming transactions",
+            "Computes dynamic 1-hop and 2-hop neighborhood subgraphs for arbitrary entities"
+          ],
+          "dependencies": ["TASK-101"]
+        },
+        {
+          "id": "TASK-202",
+          "title": "Graph Topology & Fraud Ring Clustering",
+          "status": "NOT_STARTED",
+          "acceptance_criteria": [
+            "Detects connected components, high-degree shared devices/IPs, and circular transaction flows",
+            "Computes graph topological metrics: degree centrality, shared entity ratio, clustering coefficient",
+            "Assigns graph-based syndicate risk scores to entities"
+          ],
+          "dependencies": ["TASK-201"]
+        }
+      ]
+    },
+    {
+      "id": "EPIC-3",
+      "name": "Streaming Ingestion & Online/Offline Feature Store",
+      "description": "Kafka-compatible streaming ingestion, real-time windowed aggregation, and point-in-time consistent feature store.",
+      "tasks": [
+        {
+          "id": "TASK-301",
+          "title": "Streaming Window Feature Aggregator",
+          "status": "NOT_STARTED",
+          "acceptance_criteria": [
+            "Computes tumbling and sliding window metrics across 1m, 5m, 1h, 24h, 7d intervals",
+            "Calculates card velocity, user spend acceleration, device uniqueness ratio, and geo-distance velocity",
+            "Guarantees point-in-time correctness without lookahead leakage"
+          ],
+          "dependencies": ["TASK-101"]
+        },
+        {
+          "id": "TASK-302",
+          "title": "Dual Online & Offline Feature Store",
+          "status": "NOT_STARTED",
+          "acceptance_criteria": [
+            "Online low-latency key-value feature retrieval (< 5ms)",
+            "Offline historical feature store for reproducible model training",
+            "Strict schema validation and feature consistency checking"
+          ],
+          "dependencies": ["TASK-301"]
+        }
+      ]
+    },
+    {
+      "id": "EPIC-4",
+      "name": "Evolutionary Model Progression Hierarchy",
+      "description": "Full model progression from Logistic Regression and XGBoost to Isolation Forest, Autoencoder, GCN, GraphSAGE, GAT, and Temporal-GNN.",
+      "tasks": [
+        {
+          "id": "TASK-401",
+          "title": "Tabular Baselines (Logistic Regression & XGBoost)",
+          "status": "NOT_STARTED",
+          "acceptance_criteria": [
+            "Interpretable L1/L2 penalized Logistic Regression baseline with calibrated probabilities",
+            "High-performance XGBoost classifier with feature importances and class-imbalance weighting",
+            "Leakage-safe temporal validation splits"
+          ],
+          "dependencies": ["TASK-302"]
+        },
+        {
+          "id": "TASK-402",
+          "title": "Unsupervised Anomaly Detectors (Isolation Forest & Autoencoder)",
+          "status": "NOT_STARTED",
+          "acceptance_criteria": [
+            "Isolation Forest baseline for zero-day anomaly detection",
+            "PyTorch Deep Autoencoder trained on reconstruction loss of benign transactional patterns",
+            "Outputs normalized anomaly risk scores"
+          ],
+          "dependencies": ["TASK-302"]
+        },
+        {
+          "id": "TASK-403",
+          "title": "Graph Neural Networks (GCN, GraphSAGE & GAT)",
+          "status": "NOT_STARTED",
+          "acceptance_criteria": [
+            "2-layer GCN aggregating local structural patterns",
+            "Inductive GraphSAGE with Mean/Pooling aggregator for unseen nodes and transactions",
+            "Multi-head Graph Attention Network (GAT) learning adaptive edge attention weights"
+          ],
+          "dependencies": ["TASK-201", "TASK-302"]
+        },
+        {
+          "id": "TASK-404",
+          "title": "Temporal Graph Neural Network (T-GNN)",
+          "status": "NOT_STARTED",
+          "acceptance_criteria": [
+            "Incorporates edge timestamps and exponential time-decay kernels",
+            "Maintains dynamic historical node state embeddings",
+            "Proves whether temporal graph complexity improves fraud detection over static GNNs"
+          ],
+          "dependencies": ["TASK-403"]
+        }
+      ]
+    },
+    {
+      "id": "EPIC-5",
+      "name": "Sub-Second Scoring Engine & Cost-Sensitive Decision Policy",
+      "description": "Ultra-low latency inference engine, cost-sensitive threshold optimization, reason codes, and supporting graph evidence.",
+      "tasks": [
+        {
+          "id": "TASK-501",
+          "title": "Real-Time Scoring Engine & Decision Policy",
+          "status": "NOT_STARTED",
+          "acceptance_criteria": [
+            "Sub-second end-to-end inference latency (< 50ms P99)",
+            "Cost-sensitive threshold optimization minimizing C_FP + C_FN",
+            "Emits categorical decisions: APPROVE, CHALLENGE, DECLINE with risk score (0-100)"
+          ],
+          "dependencies": ["TASK-404"]
+        },
+        {
+          "id": "TASK-502",
+          "title": "Explainability & Evidence Assembly",
+          "status": "NOT_STARTED",
+          "acceptance_criteria": [
+            "Extracts top contributing risk factors and triggered velocity/graph rules",
+            "Assembles 2-hop graph evidence showing linked suspicious devices/IPs/cards",
+            "Outputs complete audit log with immutable decision hash"
+          ],
+          "dependencies": ["TASK-501"]
+        }
+      ]
+    },
+    {
+      "id": "EPIC-6",
+      "name": "Model Monitoring, Drift Detection & Automated Retraining",
+      "description": "Real-time drift detection (PSI, KS-test), delayed label feedback, and automated retraining triggers.",
+      "tasks": [
+        {
+          "id": "TASK-601",
+          "title": "Concept & Feature Drift Monitor",
+          "status": "NOT_STARTED",
+          "acceptance_criteria": [
+            "Computes Population Stability Index (PSI) and Kolmogorov-Smirnov statistics on feature distributions",
+            "Detects prediction distribution shifts and adversarial pattern mutations",
+            "Emits automated retraining alerts when drift exceeds thresholds (PSI > 0.25)"
+          ],
+          "dependencies": ["TASK-501"]
+        },
+        {
+          "id": "TASK-602",
+          "title": "Delayed Labels & Retraining Pipeline",
+          "status": "NOT_STARTED",
+          "acceptance_criteria": [
+            "Simulates delayed chargeback feedback arrival (14-90 days)",
+            "Ingests fraud investigator feedback into gold labeled dataset",
+            "Executes automated model retraining and champion/challenger comparison"
+          ],
+          "dependencies": ["TASK-601"]
+        }
+      ]
+    },
+    {
+      "id": "EPIC-7",
+      "name": "Comprehensive Scientific Evaluation Harness",
+      "description": "Scientific benchmark comparing all 8 models (LR, XGB, IF, AE, GCN, GraphSAGE, GAT, T-GNN) under identical temporal splits.",
+      "tasks": [
+        {
+          "id": "TASK-701",
+          "title": "Multi-Model Scientific Evaluation Suite",
+          "status": "NOT_STARTED",
+          "acceptance_criteria": [
+            "Measures Precision, Recall, PR-AUC, ROC-AUC, Fraud Capture Rate @ 1% FPR",
+            "Computes False Positive Cost vs Fraud Prevented",
+            "Benchmarks inference latency and throughput across all 8 models"
+          ],
+          "dependencies": ["TASK-404"]
+        }
+      ]
+    },
+    {
+      "id": "EPIC-8",
+      "name": "FastAPI Web Service & Streaming APIs",
+      "description": "High-throughput REST and SSE endpoints for transaction scoring, live stream events, graph inspection, and analyst decisions.",
+      "tasks": [
+        {
+          "id": "TASK-801",
+          "title": "FastAPI Streaming & Investigation Endpoints",
+          "status": "NOT_STARTED",
+          "acceptance_criteria": [
+            "POST /api/score for sub-second real-time transaction scoring",
+            "GET /api/stream for SSE streaming of live transactions and risk decisions",
+            "GET /api/graph/entity/{id} and /api/benchmark endpoints",
+            "POST /api/investigation/decision for analyst feedback and actions"
+          ],
+          "dependencies": ["TASK-502", "TASK-701"]
+        }
+      ]
+    },
+    {
+      "id": "EPIC-9",
+      "name": "Fraud Investigation Console Frontend",
+      "description": "React + TypeScript analyst workspace with live transaction stream, interactive graph visualizer, fraud ring inspector, and model benchmark comparisons.",
+      "tasks": [
+        {
+          "id": "TASK-901",
+          "title": "React + TypeScript Fraud Console",
+          "status": "NOT_STARTED",
+          "acceptance_criteria": [
+            "Real-time transaction stream with color-coded risk scores",
+            "Interactive 2-hop entity graph neighborhood explorer",
+            "Fraud ring syndicate detector and model explanation panel",
+            "Analyst action modal (Approve, Confirm Fraud, Whitelist)"
+          ],
+          "dependencies": ["TASK-801"]
+        }
+      ]
+    },
+    {
+      "id": "EPIC-10",
+      "name": "Packaging, Docker, Kubernetes & AWS Infrastructure",
+      "description": "Production Dockerfile, docker-compose, Kubernetes manifests, and enterprise AWS deployment guide.",
+      "tasks": [
+        {
+          "id": "TASK-1001",
+          "title": "Containerization & Cloud Infrastructure",
+          "status": "NOT_STARTED",
+          "acceptance_criteria": [
+            "Multi-stage Dockerfile and docker-compose.yml",
+            "Kubernetes deployment and HPA manifests",
+            "Comprehensive AWS production deployment guide (MSK, EKS, RDS, Redis, S3)"
+          ],
+          "dependencies": ["TASK-901"]
+        }
+      ]
+    }
+  ]
+}
